@@ -1,7 +1,11 @@
 package queries
 
-import "go.mongodb.org/mongo-driver/mongo"
+import "github.com/jmoiron/sqlx"
 
 type UserQueries struct {
-	*mongo.Client
+	*sqlx.DB
+}
+
+func (q *UserQueries) GetUserById() {
+
 }
