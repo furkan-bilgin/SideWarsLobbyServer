@@ -1,9 +1,9 @@
 package queries
 
-import "github.com/jmoiron/sqlx"
+import "gorm.io/gorm"
 
 type UserQueries struct {
-	*sqlx.DB
+	*gorm.DB
 }
 
 func (q *UserQueries) GetUserById() {
