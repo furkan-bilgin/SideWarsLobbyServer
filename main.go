@@ -8,7 +8,12 @@ import (
 
 func main() {
 	rest := rest.Create()
+	InitDatabases()
 
+	rest.Listen(":3000")
+}
+
+func InitDatabases() {
 	dbq, dbc, err := database.MysqlConnection()
 	database.DBQueries, database.DBConnection = dbq, dbc
 	if err != nil {
@@ -20,6 +25,4 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	rest.Listen(":3000")
 }
