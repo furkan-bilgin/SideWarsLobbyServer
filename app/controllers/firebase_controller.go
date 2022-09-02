@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"os"
+	"sidewarslobby/pkg/utils"
 	"sidewarslobby/platform/database"
 
 	"github.com/gofiber/fiber/v2"
@@ -38,32 +39,26 @@ func InitFirebase() (*firebase.App, *auth.Client, error) {
 // Validate Firebase token and authenticate the user with it
 func AuthViaFirebase(c *fiber.Ctx) error {
 	payload := struct {
-		IdToken string
+		FirebaseToken string
 	}{}
 
 	if err := c.BodyParser(&payload); err != nil {
 		return err
 	}
 
-	token, err := FirebaseAuth.VerifyIDTokenAndCheckRevoked(c.Context(), payload.IdToken)
+	token, err := FirebaseAuth.VerifyIDTokenAndCheckRevoked(c.Context(), payload.FirebaseToken)
 	if err != nil {
-		return c.JSON(fiber.Map{
-			"error":   true,
-			"message": "Hatalı token",
-		})
+		return utils.RESTError(c, "Hesap doğrulanamadı")
 	}
 
 	u, err := FirebaseAuth.GetUser(c.Context(), token.UID)
 	if err != nil {
-		return c.JSON(fiber.Map{
-			"error":   true,
-			"message": "Kullanıcı bulunamadı",
-		})
+		return utils.RESTError(c, "Kullanıcı bulunamadı")
 	}
 
 	db_user := database.DBQueries.CreateOrUpdateUser(u)
 
 	return c.JSON(fiber.Map{
-		"token": db_user.Token,
+		"Token": db_user.Token,
 	})
 }
