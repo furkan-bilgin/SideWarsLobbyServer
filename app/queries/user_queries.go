@@ -2,7 +2,6 @@ package queries
 
 import (
 	"sidewarslobby/app/models"
-	"time"
 
 	"firebase.google.com/go/auth"
 	"github.com/google/uuid"
@@ -33,7 +32,6 @@ func (q *UserQueries) CreateOrUpdateUser(firebaseUser *auth.UserRecord) models.U
 	if res.Error != nil {
 		// User does not exist, create new one
 		user := userUpdate
-		user.CreatedAt = time.Now()
 		user.FirebaseID = firebaseUser.UID
 
 		q.DB.Create(&user)
