@@ -56,9 +56,9 @@ func AuthViaFirebase(c *fiber.Ctx) error {
 		return utils.RESTError(c, "Kullanıcı bulunamadı")
 	}
 
-	db_user := database.DBQueries.CreateOrUpdateUser(firebaseUser)
+	dbUser := database.DBQueries.CreateOrUpdateUser(firebaseUser)
 
 	return c.JSON(fiber.Map{
-		"Token": db_user.Token,
+		"Token": dbUser.Token,
 	})
 }
