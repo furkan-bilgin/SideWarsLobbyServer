@@ -51,12 +51,12 @@ func AuthViaFirebase(c *fiber.Ctx) error {
 		return utils.RESTError(c, "Hesap doğrulanamadı")
 	}
 
-	u, err := FirebaseAuth.GetUser(c.Context(), token.UID)
+	firebaseUser, err := FirebaseAuth.GetUser(c.Context(), token.UID)
 	if err != nil {
 		return utils.RESTError(c, "Kullanıcı bulunamadı")
 	}
 
-	db_user := database.DBQueries.CreateOrUpdateUser(u)
+	db_user := database.DBQueries.CreateOrUpdateUser(firebaseUser)
 
 	return c.JSON(fiber.Map{
 		"Token": db_user.Token,
