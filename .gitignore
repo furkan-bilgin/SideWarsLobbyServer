@@ -22,3 +22,4 @@ go.work
 
 
 start.sh
+*.firebase.json 

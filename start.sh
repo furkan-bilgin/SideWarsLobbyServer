@@ -8,4 +8,6 @@ export REDIS_DB_NUMBER=0
 export REDIS_URL="redis://localhost:6379"
 export REDIS_PASSWORD=""
 
+export FIREBASE_ADMIN_JSON_PATH="./sidewars.admin.firebase.json"
+
 go run main.go
