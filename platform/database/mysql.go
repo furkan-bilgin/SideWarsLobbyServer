@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"sidewarslobby/app/models"
 	"sidewarslobby/app/queries"
 
 	"gorm.io/driver/mysql"
@@ -35,7 +36,13 @@ func MysqlConnection() (*Queries, *gorm.DB, error) {
 		return nil, nil, fmt.Errorf("error, not connected to database, %w", err)
 	}
 
+	AutoMigrateDatabase(db)
+
 	return &Queries{
 		UserQueries: &queries.UserQueries{DB: db},
 	}, db, nil
+}
+
+func AutoMigrateDatabase(db *gorm.DB) {
+	db.AutoMigrate(&models.Match{}, &models.User{}, &models.UserMatch{})
 }
