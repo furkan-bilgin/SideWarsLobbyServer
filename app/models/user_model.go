@@ -14,6 +14,7 @@ type User struct {
 	Username        string
 	FirebaseID      string
 	ProfilePhotoURL string
+	Token           string
 
 	CachedScore int
 

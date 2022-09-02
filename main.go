@@ -16,6 +16,7 @@ func main() {
 	rest.Listen(":3000")
 }
 
+// Initialize MySQL and Redis
 func InitDatabases() {
 	dbq, dbc, err := database.MysqlConnection()
 	database.DBQueries, database.DBConnection = dbq, dbc
@@ -31,10 +32,10 @@ func InitDatabases() {
 }
 
 func InitFirebase() {
-	fb, err := controllers.FirebaseApp()
+	fb, au, err := controllers.InitFirebase()
 	if err != nil {
 		panic(err)
 	}
 
-	controllers.Firebase = fb
+	controllers.FirebaseApp, controllers.FirebaseAuth = fb, au
 }
