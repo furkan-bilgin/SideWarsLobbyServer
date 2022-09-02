@@ -13,6 +13,10 @@ import (
 	"google.golang.org/api/option"
 )
 
+var (
+	Firebase *firebase.App
+)
+
 func FirebaseApp() (*firebase.App, error) {
 	opt := option.WithCredentialsFile(os.Getenv("FIREBASE_ADMIN_JSON_PATH"))
 	app, err := firebase.NewApp(context.Background(), nil, opt)

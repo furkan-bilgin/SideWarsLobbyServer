@@ -4,11 +4,14 @@ import (
 	"sidewarslobby/pkg/rest"
 	"sidewarslobby/platform/cache"
 	"sidewarslobby/platform/database"
+
+	"sidewarslobby/app/controllers"
 )
 
 func main() {
 	rest := rest.Create()
 	InitDatabases()
+	InitFirebase()
 
 	rest.Listen(":3000")
 }
@@ -25,4 +28,13 @@ func InitDatabases() {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func InitFirebase() {
+	fb, err := controllers.FirebaseApp()
+	if err != nil {
+		panic(err)
+	}
+
+	controllers.Firebase = fb
 }
