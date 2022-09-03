@@ -22,7 +22,7 @@ type User struct {
 func (u *User) CalculateElo() int {
 	diff := repository.BeginnerElo
 	for _, v := range u.UserMatches {
-		if v.Finished {
+		if v.Match.Finished {
 			diff += v.ScoreDiff
 		}
 	}

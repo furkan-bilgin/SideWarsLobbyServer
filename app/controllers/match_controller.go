@@ -87,7 +87,11 @@ func FinishUserMatches(c *fiber.Ctx) error {
 		// Update UserMatch
 		gameResult := 0
 		userMatch.UpdatedAt = time.Now()
-		userMatch.Finished = true
+
+		if !userMatch.Match.Finished {
+			userMatch.Match.Finished = true
+			database.DBQueries.UpdateMatch(&userMatch.Match)
+		}
 
 		// If we won, change these vars accordingly
 		if utils.Contains(payload.WinnerMatchTokens, v) {

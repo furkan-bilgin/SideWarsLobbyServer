@@ -19,7 +19,6 @@ type UserMatch struct {
 	MatchID uint
 	TeamID  uint8
 
-	Finished  bool
 	UserWon   bool
 	ScoreDiff int //Score diff after match is done
 
@@ -32,6 +31,7 @@ type UserMatch struct {
 type Match struct {
 	gorm.Model
 
+	Finished    bool
 	UserMatches []UserMatch `gorm:"foreignKey:MatchID"`
 }
 

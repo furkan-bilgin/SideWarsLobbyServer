@@ -25,3 +25,7 @@ func (q *MatchQueries) GetUserMatch(token string) (*models.UserMatch, error) {
 func (q *MatchQueries) UpdateUserMatch(userMatch *models.UserMatch) error {
 	return q.DB.Save(&userMatch).Error
 }
+
+func (q *MatchQueries) UpdateMatch(match *models.Match) error {
+	return q.DB.Save(&match).Error
+}
