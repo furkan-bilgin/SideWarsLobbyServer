@@ -43,7 +43,7 @@ func (q *UserQueries) CreateOrUpdateUser(firebaseUser *auth.UserRecord) models.U
 	return q.GetUserById(user.ID)
 }
 
-func (q *UserQueries) CacheUserScore(user *models.User) error {
+func (q *UserQueries) CacheUserElo(user *models.User) error {
 	user.CachedElo = user.CalculateElo()
 	return q.DB.Save(user).Error
 }

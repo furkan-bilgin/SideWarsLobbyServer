@@ -100,7 +100,7 @@ func FinishUserMatches(c *fiber.Ctx) error {
 
 		// Finally, update UserMatch info, and re-cache user elo
 		database.DBQueries.UpdateUserMatch(userMatch)
-		database.DBQueries.CacheUserScore(&userMatch.User)
+		database.DBQueries.CacheUserElo(&userMatch.User)
 	}
 
 	return c.JSON(fiber.Map{
