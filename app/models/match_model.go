@@ -23,7 +23,7 @@ type UserMatch struct {
 	UserWon   bool
 	ScoreDiff int //Score diff after match is done
 
-	UserChampion int
+	UserChampion uint8
 
 	Match Match `gorm:"foreignKey:MatchID;references:ID"`
 	User  User  `gorm:"foreignKey:UserID;references:ID"`
