@@ -1,6 +1,8 @@
 package repository
 
 const (
-	WinScoreDiff  int = 4
-	LoseScoreDiff int = -1
+	BeginnerElo    = 1200
+	BeginnerEloK   = 80
+	DefaultEloK    = 32
+	LerpKGameCount = 5
 )

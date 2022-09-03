@@ -3,6 +3,7 @@ package controllers
 import (
 	"bytes"
 	"os"
+	"sidewarslobby/app/models"
 	"sidewarslobby/pkg/repository"
 	"sidewarslobby/pkg/utils"
 	"sidewarslobby/platform/database"
@@ -63,16 +64,43 @@ func FinishUserMatches(c *fiber.Ctx) error {
 			return utils.RESTError(c, "Maç bulunamadı")
 		}
 
+		// Find enemy team
+		enemyTeam := models.TeamRed
+		if userMatch.TeamID == models.TeamRed {
+			enemyTeam = models.TeamBlue
+		}
+
+		// Calculate average enemy elo
+		enemies := userMatch.Match.GetUsersByTeamID(enemyTeam)
+		enemySum := 0
+		for _, v := range enemies {
+			enemySum += v.CachedElo
+		}
+		averageEnemyElo := enemySum / len(enemies)
+
+		// Lerp: K_Beginner -> K_Default over the course of LerpKGameCount games
+		kValue := (repository.LerpKGameCount - len(userMatch.User.UserMatches)) / repository.LerpKGameCount
+		kValue = int(utils.LinearInterp(repository.DefaultEloK, repository.BeginnerEloK, float64(kValue)))
+
+		elo := utils.NewEloWithFactors(kValue, utils.NewElo().D)
+
+		// Update UserMatch
+		gameResult := 0
 		userMatch.UpdatedAt = time.Now()
 		userMatch.Finished = true
-		userMatch.ScoreDiff = repository.LoseScoreDiff
+
+		// If we won, change these vars accordingly
 		if utils.Contains(payload.WinnerMatchTokens, v) {
-			// Change ScoreDiff If the token is also in the WinnerMatchTokens
-			userMatch.ScoreDiff = repository.WinScoreDiff
+			gameResult = 1
 			userMatch.UserWon = true
 		}
 
+		// gameResult = 1 -> user wins, gameResult = 0 -> enemy wins
+		userMatch.ScoreDiff = elo.RatingDelta(userMatch.User.CachedElo, averageEnemyElo, float64(gameResult))
+
+		// Finally, update UserMatch info, and re-cache user elo
 		database.DBQueries.UpdateUserMatch(userMatch)
+		database.DBQueries.CacheUserScore(&userMatch.User)
 	}
 
 	return c.JSON(fiber.Map{

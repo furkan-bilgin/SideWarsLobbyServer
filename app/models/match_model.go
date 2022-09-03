@@ -5,6 +5,11 @@ import (
 	"gorm.io/gorm"
 )
 
+const (
+	TeamRed  uint8 = 0
+	TeamBlue uint8 = 1
+)
+
 type UserMatch struct {
 	gorm.Model
 
@@ -12,6 +17,7 @@ type UserMatch struct {
 
 	UserID  uint
 	MatchID uint
+	TeamID  uint8
 
 	Finished  bool
 	UserWon   bool
@@ -27,4 +33,13 @@ type Match struct {
 	gorm.Model
 
 	UserMatches []UserMatch `gorm:"foreignKey:MatchID"`
+}
+
+func (m *Match) GetUsersByTeamID(teamID uint8) []*User {
+	var res []*User
+	for _, v := range m.UserMatches {
+		res = append(res, &v.User)
+	}
+
+	return res
 }

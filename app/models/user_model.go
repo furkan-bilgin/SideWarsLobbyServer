@@ -1,6 +1,8 @@
 package models
 
 import (
+	"sidewarslobby/pkg/repository"
+
 	"gorm.io/gorm"
 )
 
@@ -12,13 +14,13 @@ type User struct {
 	ProfilePhotoURL string
 	Token           string
 
-	CachedScore int
+	CachedElo int
 
 	UserMatches []UserMatch
 }
 
-func (u *User) CalculateScore() int {
-	diff := 0
+func (u *User) CalculateElo() int {
+	diff := repository.BeginnerElo
 	for _, v := range u.UserMatches {
 		if v.Finished {
 			diff += v.ScoreDiff
