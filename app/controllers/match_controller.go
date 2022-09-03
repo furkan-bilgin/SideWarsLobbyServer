@@ -3,8 +3,10 @@ package controllers
 import (
 	"bytes"
 	"os"
+	"sidewarslobby/pkg/repository"
 	"sidewarslobby/pkg/utils"
 	"sidewarslobby/platform/database"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -39,5 +41,40 @@ func ConfirmUserMatch(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"Username":     userMatch.User.Username,
 		"UserChampion": userMatch.UserChampion,
+	})
+}
+
+func FinishUserMatches(c *fiber.Ctx) error {
+	if !validateServerToken(c) {
+		return nil
+	}
+
+	payload := struct {
+		UserMatchTokens   []string
+		WinnerMatchTokens []string
+	}{}
+	if err := c.BodyParser(&payload); err != nil {
+		return err
+	}
+
+	for _, v := range payload.UserMatchTokens {
+		userMatch, err := database.DBQueries.GetUserMatch(v)
+		if err != nil {
+			return utils.RESTError(c, "Maç bulunamadı")
+		}
+
+		userMatch.UpdatedAt = time.Now()
+		userMatch.Finished = true
+		userMatch.ScoreDiff = repository.LoseScoreDiff
+		if utils.Contains(payload.WinnerMatchTokens, v) {
+			userMatch.ScoreDiff = repository.WinScoreDiff
+			userMatch.UserWon = true
+		}
+
+		database.DBQueries.UpdateUserMatch(userMatch)
+	}
+
+	return c.JSON(fiber.Map{
+		"Success": true,
 	})
 }

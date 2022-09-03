@@ -10,12 +10,12 @@ type UserMatch struct {
 
 	ID uuid.UUID `gorm:"primaryKey"`
 
-	UserID    uint
-	MatchID   uint
-	ScoreDiff int //Score diff after match is done
+	UserID  uint
+	MatchID uint
 
-	Finished bool
-	UserWon  bool
+	Finished  bool
+	UserWon   bool
+	ScoreDiff int //Score diff after match is done
 
 	UserChampion int
 
