@@ -67,6 +67,7 @@ func FinishUserMatches(c *fiber.Ctx) error {
 		userMatch.Finished = true
 		userMatch.ScoreDiff = repository.LoseScoreDiff
 		if utils.Contains(payload.WinnerMatchTokens, v) {
+			// Change ScoreDiff If the token is also in the WinnerMatchTokens
 			userMatch.ScoreDiff = repository.WinScoreDiff
 			userMatch.UserWon = true
 		}
