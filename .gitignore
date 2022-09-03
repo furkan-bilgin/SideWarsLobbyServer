@@ -21,5 +21,5 @@
 go.work
 
 
-start.sh
+*.sh
 *.firebase.json 

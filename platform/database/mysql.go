@@ -9,6 +9,7 @@ import (
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var (
@@ -18,6 +19,7 @@ var (
 
 type Queries struct {
 	*queries.UserQueries
+	*queries.MatchQueries
 }
 
 func MysqlConnection() (*Queries, *gorm.DB, error) {
@@ -30,7 +32,9 @@ func MysqlConnection() (*Queries, *gorm.DB, error) {
 		os.Getenv("DB_NAME"),
 	)
 
-	db, err := gorm.Open(mysql.Open(mysqlConnURL), &gorm.Config{})
+	db, err := gorm.Open(mysql.Open(mysqlConnURL), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Silent),
+	})
 
 	if err != nil {
 		return nil, nil, fmt.Errorf("error, not connected to database, %w", err)
@@ -39,10 +43,14 @@ func MysqlConnection() (*Queries, *gorm.DB, error) {
 	AutoMigrateDatabase(db)
 
 	return &Queries{
-		UserQueries: &queries.UserQueries{DB: db},
+		UserQueries:  &queries.UserQueries{DB: db},
+		MatchQueries: &queries.MatchQueries{DB: db},
 	}, db, nil
 }
 
 func AutoMigrateDatabase(db *gorm.DB) {
-	db.AutoMigrate(&models.Match{}, &models.User{}, &models.UserMatch{})
+	err := db.AutoMigrate(&models.Match{}, &models.User{}, &models.UserMatch{})
+	if err != nil {
+		panic(err)
+	}
 }

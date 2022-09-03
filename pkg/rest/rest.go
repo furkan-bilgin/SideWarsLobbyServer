@@ -29,4 +29,5 @@ func serveV1Api(app *fiber.App) {
 	v1 := app.Group("/api/v1")
 
 	v1.Post("/auth/firebase", controllers.AuthViaFirebase)
+	v1.Post("/server/confirm-user-match", controllers.ConfirmUserMatch)
 }

@@ -10,4 +10,6 @@ export REDIS_PASSWORD=""
 
 export FIREBASE_ADMIN_JSON_PATH="./sidewars.admin.firebase.json"
 
+export SW_SERVER_TOKEN="fcc91728-946c-40d4-9e25-772b4f4d6434"
+
 go run main.go

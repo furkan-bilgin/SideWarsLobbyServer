@@ -1,8 +1,6 @@
 package models
 
 import (
-	"time"
-
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -10,8 +8,7 @@ import (
 type UserMatch struct {
 	gorm.Model
 
-	ID        uuid.UUID `gorm:"primaryKey"`
-	CreatedAt time.Time
+	ID uuid.UUID `gorm:"primaryKey"`
 
 	UserID    uint
 	MatchID   uint
@@ -20,12 +17,14 @@ type UserMatch struct {
 	Finished bool
 	UserWon  bool
 
+	UserChampion int
+
 	Match Match `gorm:"foreignKey:MatchID;references:ID"`
+	User  User  `gorm:"foreignKey:UserID;references:ID"`
 }
 
 type Match struct {
-	ID uint
+	gorm.Model
 
-	CreatedAt   time.Time
 	UserMatches []UserMatch `gorm:"foreignKey:MatchID"`
 }
