@@ -22,7 +22,7 @@ func Create() *fiber.App {
 }
 
 func serveStaticFiles(app *fiber.App) {
-	app.Static("/robots.txt", "static/robots.txt")
+	app.Static("/robots.txt", "./static/robots.txt")
 }
 
 func serveV1Api(app *fiber.App) {

@@ -23,7 +23,8 @@ func (q *UserQueries) UpdateUserDetails(user models.User, updates models.User) {
 	q.DB.Model(&user).Updates(updates)
 }
 
-func (q *UserQueries) CreateOrUpdateUser(firebaseUser *auth.UserRecord) models.User {
+// Creates or updates a user, also returns True if a new user record was created
+func (q *UserQueries) CreateOrUpdateUser(firebaseUser *auth.UserRecord) (models.User, bool) {
 	var user models.User
 	userUpdate := models.User{ProfilePhotoURL: firebaseUser.PhotoURL, Username: firebaseUser.DisplayName, Token: uuid.NewString()}
 
@@ -35,12 +36,12 @@ func (q *UserQueries) CreateOrUpdateUser(firebaseUser *auth.UserRecord) models.U
 		user.FirebaseID = firebaseUser.UID
 
 		q.DB.Create(&user)
-		return user
+		return user, true
 	}
 
 	// Else, update data
 	q.UpdateUserDetails(user, userUpdate)
-	return q.GetUserById(user.ID)
+	return q.GetUserById(user.ID), false
 }
 
 func (q *UserQueries) CacheUserElo(user *models.User) error {
