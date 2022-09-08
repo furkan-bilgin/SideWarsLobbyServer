@@ -31,12 +31,9 @@ func serveV1Api(app *fiber.App) {
 	// Auth
 	v1.Post("/user/auth-firebase", controllers.AuthViaFirebase)
 
-	// Queue
-	v1.Post("/user/join-queue", controllers.CheckQueueStatus)
-	v1.Post("/user/leave-queue", controllers.CheckQueueStatus)
-	v1.Get("/user/queue-status", controllers.CheckQueueStatus)
-
 	// GameServer
 	v1.Post("/server/confirm-user-match", controllers.ConfirmUserMatch)
 	v1.Post("/server/finish-user-matches", controllers.FinishUserMatches)
+
+	// Queue is in websocket package
 }

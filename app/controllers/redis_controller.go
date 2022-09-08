@@ -32,12 +32,18 @@ func InitRedisController() {
 
 func RedisSendJoinQueue(mUser MatchmakingUser) {
 	data, _ := json.Marshal(mUser)
-	cache.RedisClient.Publish(context.TODO(), "queue-add-user", data)
+	err := cache.RedisClient.Publish(context.Background(), "queue-add-user", data).Err()
+	if err != nil {
+		panic(err)
+	}
 }
 
 func RedisSendLeaveQueue(userID int) {
 	data, _ := json.Marshal(MatchmakingUser{UserID: userID})
-	cache.RedisClient.Publish(context.TODO(), "queue-remove-user", data)
+	err := cache.RedisClient.Publish(context.Background(), "queue-remove-user", data).Err()
+	if err != nil {
+		panic(err)
+	}
 }
 
 func listenQueueNewPair() {
