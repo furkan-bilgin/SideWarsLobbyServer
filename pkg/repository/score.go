@@ -1,8 +1,8 @@
 package repository
 
 const (
-	BeginnerElo    = 1200
-	BeginnerEloK   = 150
+	BeginnerElo    = 1300
+	BeginnerEloK   = 250
 	DefaultEloK    = 32
-	LerpKGameCount = 5
+	LerpKGameCount = 6
 )

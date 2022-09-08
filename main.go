@@ -29,6 +29,8 @@ func InitDatabases() {
 	if err != nil {
 		panic(err)
 	}
+
+	controllers.InitRedisController()
 }
 
 func InitFirebase() {
