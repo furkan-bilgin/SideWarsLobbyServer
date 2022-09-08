@@ -12,11 +12,25 @@ type UserQueries struct {
 	DB *gorm.DB
 }
 
-func (q *UserQueries) GetUserById(id uint) models.User {
+func (q *UserQueries) GetUserById(id uint) *models.User {
 	var user models.User
-	q.DB.First(&user, id)
+	res := q.DB.First(&user, id)
 
-	return user
+	if res.Error != nil {
+		return nil
+	}
+
+	return &user
+}
+
+func (q *UserQueries) GetUserByToken(token string) *models.User {
+	var user models.User
+	res := q.DB.First(&user, "token = ?", token)
+	if res.Error != nil {
+		return nil
+	}
+
+	return &user
 }
 
 func (q *UserQueries) UpdateUserDetails(user models.User, updates models.User) {
@@ -24,7 +38,7 @@ func (q *UserQueries) UpdateUserDetails(user models.User, updates models.User) {
 }
 
 // Creates or updates a user, also returns True if a new user record was created
-func (q *UserQueries) CreateOrUpdateUser(firebaseUser *auth.UserRecord) (models.User, bool) {
+func (q *UserQueries) CreateOrUpdateUser(firebaseUser *auth.UserRecord) (*models.User, bool) {
 	var user models.User
 	userUpdate := models.User{ProfilePhotoURL: firebaseUser.PhotoURL, Username: firebaseUser.DisplayName, Token: uuid.NewString()}
 
@@ -36,7 +50,7 @@ func (q *UserQueries) CreateOrUpdateUser(firebaseUser *auth.UserRecord) (models.
 		user.FirebaseID = firebaseUser.UID
 
 		q.DB.Create(&user)
-		return user, true
+		return &user, true
 	}
 
 	// Else, update data

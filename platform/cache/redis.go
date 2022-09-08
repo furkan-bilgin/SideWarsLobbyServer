@@ -2,7 +2,6 @@ package cache
 
 import (
 	"os"
-	"strconv"
 
 	"github.com/go-redis/redis/v8"
 )
@@ -13,18 +12,10 @@ var (
 
 // RedisConnection func for connect to Redis server.
 func RedisConnection() (*redis.Client, error) {
-	// Define Redis database number.
-	dbNumber, _ := strconv.Atoi(os.Getenv("REDIS_DB_NUMBER"))
-
-	// Build Redis connection URL.
-	redisConnURL := os.Getenv("REDIS_URL")
-
-	// Set Redis options.
-	options := &redis.Options{
-		Addr:     redisConnURL,
-		Password: os.Getenv("REDIS_PASSWORD"),
-		DB:       dbNumber,
+	opt, err := redis.ParseURL(os.Getenv("REDIS_URL"))
+	if err != nil {
+		panic(err)
 	}
 
-	return redis.NewClient(options), nil
+	return redis.NewClient(opt), nil
 }

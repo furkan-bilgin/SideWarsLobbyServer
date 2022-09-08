@@ -32,6 +32,8 @@ func MysqlConnection() (*Queries, *gorm.DB, error) {
 		os.Getenv("DB_NAME"),
 	)
 
+	mysqlConnURL += "?parseTime=true"
+
 	db, err := gorm.Open(mysql.Open(mysqlConnURL), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Silent),
 	})

@@ -2,6 +2,7 @@ package main
 
 import (
 	"sidewarslobby/pkg/rest"
+	"sidewarslobby/pkg/websocket"
 	"sidewarslobby/platform/cache"
 	"sidewarslobby/platform/database"
 
@@ -12,6 +13,7 @@ func main() {
 	rest := rest.Create()
 	InitDatabases()
 	InitFirebase()
+	websocket.Create(rest)
 
 	rest.Listen(":3000")
 }
