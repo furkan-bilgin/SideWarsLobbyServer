@@ -50,15 +50,33 @@ func QueueWebsocketNew(kws *ikisocket.Websocket) {
 				for pairUp := range l.Ch() {
 					// If this user paired up...
 					if pairUp.UserID == int(userId) {
+						var match *models.Match
+						// Wait until Match gets created
+						tryCount := 0
+						for match == nil {
+							if tryCount > 2 {
+								println("QUEUEWEBSOCKET - !! NO MATCH record could be found.")
+								kws.Close()
+								return
+							}
+							match, _ = database.DBQueries.GetMatchByMatchmakingID(pairUp.MatchID)
+							tryCount++
+							time.Sleep(500 * time.Millisecond)
+						}
+
 						// Create UserMatch
 						userMatch := models.UserMatch{
 							Token:        uuid.New().String(),
 							UserID:       userId,
-							MatchID:      uuid.MustParse(pairUp.MatchID),
+							MatchID:      match.ID,
 							UserChampion: user.UserInfo.SelectedChampion,
 							TeamID:       pairUp.TeamID,
 						}
-						database.DBQueries.CreateUserMatch(&userMatch)
+
+						err := database.DBQueries.CreateUserMatch(&userMatch)
+						if err != nil {
+							panic(err)
+						}
 
 						// Send payload to WebSocket client
 						payload := struct {
@@ -68,6 +86,9 @@ func QueueWebsocketNew(kws *ikisocket.Websocket) {
 
 						payloadBytes, _ := json.Marshal(payload)
 						kws.Emit(payloadBytes)
+
+						// Close connection without post-close actions
+						kws.SetAttribute("isClosed", true)
 					}
 				}
 			}

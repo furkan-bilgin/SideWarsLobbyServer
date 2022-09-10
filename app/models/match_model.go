@@ -13,7 +13,7 @@ const (
 type UserMatch struct {
 	gorm.Model
 
-	MatchID uuid.UUID `gorm:"type:varchar(191)"`
+	MatchID uint
 	UserID  uint
 	TeamID  uint8
 	Token   string
@@ -30,7 +30,7 @@ type UserMatch struct {
 type Match struct {
 	gorm.Model
 
-	MatchID uuid.UUID
+	MatchmakingID uuid.UUID
 
 	Finished    bool
 	UserMatches []UserMatch `gorm:"foreignKey:MatchID"`

@@ -22,6 +22,18 @@ func (q *MatchQueries) GetUserMatch(token string) (*models.UserMatch, error) {
 	return &userMatch, nil
 }
 
+func (q *MatchQueries) GetMatchByMatchmakingID(mId string) (*models.Match, error) {
+	var match models.Match
+
+	res := q.DB.First(&match, "matchmaking_id = ?", mId)
+
+	if res.Error != nil {
+		return nil, res.Error
+	}
+
+	return &match, nil
+}
+
 func (q *MatchQueries) UpdateUserMatch(userMatch *models.UserMatch) error {
 	return q.DB.Save(&userMatch).Error
 }
@@ -31,7 +43,7 @@ func (q *MatchQueries) UpdateMatch(match *models.Match) error {
 }
 
 func (q *MatchQueries) CreateMatch(match *models.Match) error {
-	return q.DB.FirstOrCreate(match).Error
+	return q.DB.Create(match).Error
 }
 
 func (q *MatchQueries) CreateUserMatch(userMatch *models.UserMatch) error {

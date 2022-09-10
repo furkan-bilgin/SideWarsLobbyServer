@@ -67,7 +67,10 @@ func listenQueueNewMatch() {
 		}{}
 		json.Unmarshal(data, &payload)
 
-		database.DBQueries.CreateMatch(&models.Match{MatchID: uuid.MustParse(payload.MatchID)})
+		err := database.DBQueries.CreateMatch(&models.Match{MatchmakingID: uuid.MustParse(payload.MatchID)})
+		if err != nil {
+			panic(err)
+		}
 	})
 }
 
