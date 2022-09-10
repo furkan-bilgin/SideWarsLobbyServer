@@ -52,9 +52,9 @@ func QueueWebsocketNew(kws *ikisocket.Websocket) {
 					if pairUp.UserID == int(userId) {
 						// Create UserMatch
 						userMatch := models.UserMatch{
-							ID:           uuid.New().String(),
+							Token:        uuid.New().String(),
 							UserID:       userId,
-							MatchID:      uuid.MustParse(pairUp.MatchID).String(),
+							MatchID:      uuid.MustParse(pairUp.MatchID),
 							UserChampion: user.UserInfo.SelectedChampion,
 							TeamID:       pairUp.TeamID,
 						}
@@ -64,7 +64,7 @@ func QueueWebsocketNew(kws *ikisocket.Websocket) {
 						payload := struct {
 							ServerIP   string
 							MatchToken string
-						}{ServerIP: "1.game.sw.furkanbilgin.net:9876", MatchToken: userMatch.ID} // TODO: Change this
+						}{ServerIP: "1.game.sw.furkanbilgin.net:9876", MatchToken: userMatch.Token} // TODO: Change this
 
 						payloadBytes, _ := json.Marshal(payload)
 						kws.Emit(payloadBytes)
