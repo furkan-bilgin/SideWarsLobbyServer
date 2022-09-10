@@ -1,7 +1,6 @@
 package models
 
 import (
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -13,10 +12,10 @@ const (
 type UserMatch struct {
 	gorm.Model
 
-	ID uuid.UUID `gorm:"primaryKey"`
+	ID string `gorm:"primaryKey"`
 
+	MatchID string `gorm:"type:uuid"`
 	UserID  uint
-	MatchID uuid.UUID
 	TeamID  uint8
 
 	UserWon   bool
@@ -31,7 +30,7 @@ type UserMatch struct {
 type Match struct {
 	gorm.Model
 
-	ID uuid.UUID `gorm:"primaryKey"`
+	ID string `gorm:"primaryKey"`
 
 	Finished    bool
 	UserMatches []UserMatch `gorm:"foreignKey:MatchID"`

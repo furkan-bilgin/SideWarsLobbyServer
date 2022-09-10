@@ -51,7 +51,7 @@ func MysqlConnection() (*Queries, *gorm.DB, error) {
 }
 
 func AutoMigrateDatabase(db *gorm.DB) {
-	err := db.AutoMigrate(&models.Match{}, &models.User{}, &models.UserMatch{})
+	err := db.AutoMigrate(&models.Match{}, &models.User{}, &models.UserMatch{}, &models.UserInfo{})
 	if err != nil {
 		panic(err)
 	}

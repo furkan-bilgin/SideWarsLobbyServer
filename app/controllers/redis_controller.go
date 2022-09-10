@@ -8,7 +8,6 @@ import (
 	"sidewarslobby/platform/database"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/teivah/broadcast"
 )
 
@@ -66,9 +65,8 @@ func listenQueueNewMatch() {
 			MatchID string
 		}{}
 		json.Unmarshal(data, &payload)
-		uuidMatchID, _ := uuid.Parse(payload.MatchID)
 
-		database.DBQueries.CreateMatch(&models.Match{ID: uuidMatchID})
+		database.DBQueries.CreateMatch(&models.Match{ID: payload.MatchID})
 	})
 }
 
