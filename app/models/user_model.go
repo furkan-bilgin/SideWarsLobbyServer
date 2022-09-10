@@ -16,7 +16,15 @@ type User struct {
 
 	CachedElo int
 
-	UserMatches []UserMatch
+	UserMatches []UserMatch `gorm:"foreignKey:UserID"`
+	UserInfo    UserInfo    `gorm:"foreignKey:UserID"`
+}
+
+type UserInfo struct {
+	gorm.Model
+	UserID uint
+
+	SelectedChampion uint8
 }
 
 func (u *User) CalculateElo() int {

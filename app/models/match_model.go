@@ -16,7 +16,7 @@ type UserMatch struct {
 	ID uuid.UUID `gorm:"primaryKey"`
 
 	UserID  uint
-	MatchID uint
+	MatchID uuid.UUID
 	TeamID  uint8
 
 	UserWon   bool
@@ -30,6 +30,8 @@ type UserMatch struct {
 
 type Match struct {
 	gorm.Model
+
+	ID uuid.UUID `gorm:"primaryKey"`
 
 	Finished    bool
 	UserMatches []UserMatch `gorm:"foreignKey:MatchID"`

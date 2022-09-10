@@ -3,9 +3,12 @@ package controllers
 import (
 	"context"
 	"encoding/json"
+	"sidewarslobby/app/models"
 	"sidewarslobby/platform/cache"
+	"sidewarslobby/platform/database"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/teivah/broadcast"
 )
 
@@ -23,11 +26,13 @@ type MatchmakingUser struct {
 type NewPairup struct {
 	MatchID string
 	UserID  int
+	TeamID  uint8
 }
 
 func InitRedisController() {
 	RedisPairupListener = broadcast.NewRelay[NewPairup]()
 	listenQueueNewPair()
+	listenQueueNewMatch()
 }
 
 func RedisSendJoinQueue(mUser MatchmakingUser) {
@@ -52,6 +57,18 @@ func listenQueueNewPair() {
 		json.Unmarshal(data, &pairUp)
 
 		RedisPairupListener.Broadcast(pairUp)
+	})
+}
+
+func listenQueueNewMatch() {
+	go redisListener("queue-new-match", func(data []byte, dict map[string]interface{}) {
+		payload := struct {
+			MatchID string
+		}{}
+		json.Unmarshal(data, &payload)
+		uuidMatchID, _ := uuid.Parse(payload.MatchID)
+
+		database.DBQueries.CreateMatch(&models.Match{ID: uuidMatchID})
 	})
 }
 

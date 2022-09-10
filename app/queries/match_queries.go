@@ -29,3 +29,11 @@ func (q *MatchQueries) UpdateUserMatch(userMatch *models.UserMatch) error {
 func (q *MatchQueries) UpdateMatch(match *models.Match) error {
 	return q.DB.Save(&match).Error
 }
+
+func (q *MatchQueries) CreateMatch(match *models.Match) error {
+	return q.DB.FirstOrCreate(match).Error
+}
+
+func (q *MatchQueries) CreateUserMatch(userMatch *models.UserMatch) error {
+	return q.DB.Create(userMatch).Error
+}

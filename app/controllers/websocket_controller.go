@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/antoniodipinto/ikisocket"
+	"github.com/google/uuid"
 )
 
 func QueueWebsocketNew(kws *ikisocket.Websocket) {
@@ -44,11 +45,27 @@ func QueueWebsocketNew(kws *ikisocket.Websocket) {
 			case <-cancelGoroutine:
 				return
 			default:
+				// Listen pairups
 				l := RedisPairupListener.Listener(1)
 				for pairUp := range l.Ch() {
+					// If this user paired up...
 					if pairUp.UserID == int(userId) {
+						// Create UserMatch
+						userMatch := models.UserMatch{
+							ID:           uuid.New(),
+							UserID:       userId,
+							MatchID:      uuid.MustParse(pairUp.MatchID),
+							UserChampion: user.UserInfo.SelectedChampion,
+							TeamID:       pairUp.TeamID,
+						}
+						database.DBQueries.CreateUserMatch(&userMatch)
+
+						// Send payload to WebSocket client
 						payload := struct {
-						}{}
+							ServerIP string
+							Token    string
+						}{ServerIP: "1.game.sw.furkanbilgin.net:9876", Token: userMatch.ID.String()} // TODO: Change this
+
 						payloadBytes, _ := json.Marshal(payload)
 						kws.Emit(payloadBytes)
 					}
