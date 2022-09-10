@@ -43,6 +43,10 @@ func (q *MatchQueries) UpdateMatch(match *models.Match) error {
 }
 
 func (q *MatchQueries) CreateMatch(match *models.Match) error {
+	if match, _ := q.GetMatchByMatchmakingID(match.MatchmakingID.String()); match != nil {
+		return nil
+	}
+
 	return q.DB.Create(match).Error
 }
 

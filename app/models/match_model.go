@@ -13,27 +13,27 @@ const (
 type UserMatch struct {
 	gorm.Model
 
-	MatchID uint
-	UserID  uint
-	TeamID  uint8
-	Token   string
+	MatchmakingID uuid.UUID `gorm:"index"`
+	UserID        uint
+	TeamID        uint8
+	Token         string
 
 	UserWon   bool
 	ScoreDiff int //Score diff after match is done
 
 	UserChampion uint8
 
-	Match Match
+	Match Match `gorm:"foreignKey:MatchmakingID;references:MatchmakingID"`
 	User  User
 }
 
 type Match struct {
 	gorm.Model
 
-	MatchmakingID uuid.UUID
+	MatchmakingID uuid.UUID `gorm:"index;unique"`
 
 	Finished    bool
-	UserMatches []UserMatch `gorm:"foreignKey:MatchID"`
+	UserMatches []UserMatch `gorm:"foreignKey:MatchmakingID;references:MatchmakingID"`
 }
 
 func (m *Match) GetUsersByTeamID(teamID uint8) []*User {

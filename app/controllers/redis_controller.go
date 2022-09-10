@@ -55,8 +55,6 @@ func listenQueueNewPair() {
 	go redisListener("queue-new-pair", func(data []byte, dict map[string]interface{}) {
 		var pairUp NewPairup
 		json.Unmarshal(data, &pairUp)
-
-		RedisPairupListener.Broadcast(pairUp)
 	})
 }
 
@@ -68,6 +66,7 @@ func listenQueueNewMatch() {
 		json.Unmarshal(data, &payload)
 
 		err := database.DBQueries.CreateMatch(&models.Match{MatchmakingID: uuid.MustParse(payload.MatchID)})
+
 		if err != nil {
 			panic(err)
 		}
