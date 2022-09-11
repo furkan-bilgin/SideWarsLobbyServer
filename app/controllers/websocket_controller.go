@@ -76,7 +76,7 @@ func QueueWebsocketNew(kws *ikisocket.Websocket) {
 
 							payloadBytes, _ := json.Marshal(payload)
 							kws.Emit(payloadBytes)
-
+							// Make the main-thread set attribute and close the connection, because it somehow causes a deadlock when we do it inside a goroutine.
 							goroutineDone <- true
 							return
 						}
