@@ -24,6 +24,7 @@ func QueueWebsocketNew(kws *ikisocket.Websocket) {
 
 	// Init cancel signal
 	cancelGoroutine := make(chan bool)
+	goroutineDone := make(chan bool)
 
 	// Init attributes
 	kws.SetAttribute("user", *user)
@@ -32,7 +33,7 @@ func QueueWebsocketNew(kws *ikisocket.Websocket) {
 	userId := user.ID
 
 	mUser := MatchmakingUser{
-		UserID:    int(userId),
+		UserID:    userId,
 		CreatedAt: time.Now(),
 		Elo:       user.CachedElo,
 	}
@@ -45,41 +46,49 @@ func QueueWebsocketNew(kws *ikisocket.Websocket) {
 			case <-cancelGoroutine:
 				return
 			default:
-				// Listen pairups
-				l := RedisPairupListener.Listener(10)
-				for pairUp := range l.Ch() {
-					// If this user paired up...
-					if pairUp.UserID == int(userId) {
-						// Create UserMatch
-						userMatch := models.UserMatch{
-							Token:         uuid.New().String(),
-							UserID:        userId,
-							MatchmakingID: uuid.MustParse(pairUp.MatchID),
-							UserChampion:  user.UserInfo.SelectedChampion,
-							TeamID:        pairUp.TeamID,
+				// Listen matches
+				l := RedisNewMatchListener.Listener(1)
+
+				// Received a new match
+				for match := range l.Ch() {
+					for _, otherUserID := range match.UserIDs {
+						if otherUserID == int(userId) {
+							// Create UserMatch
+							userMatch := models.UserMatch{
+								Token:        uuid.New().String(),
+								UserID:       userId,
+								MatchID:      match.Match.ID,
+								UserChampion: user.UserInfo.SelectedChampion,
+								TeamID:       match.Teams[otherUserID],
+							}
+
+							err := database.DBQueries.CreateUserMatch(&userMatch)
+
+							if err != nil {
+								panic(err)
+							}
+
+							// Send payload to WebSocket client
+							payload := struct {
+								ServerIP   string
+								MatchToken string
+							}{ServerIP: "1.game.sw.furkanbilgin.net:9876", MatchToken: userMatch.Token} // TODO: Change this
+
+							payloadBytes, _ := json.Marshal(payload)
+							kws.Emit(payloadBytes)
+
+							goroutineDone <- true
+							return
 						}
-
-						err := database.DBQueries.CreateUserMatch(&userMatch)
-						if err != nil {
-							panic(err)
-						}
-
-						// Send payload to WebSocket client
-						payload := struct {
-							ServerIP   string
-							MatchToken string
-						}{ServerIP: "1.game.sw.furkanbilgin.net:9876", MatchToken: userMatch.Token} // TODO: Change this
-
-						payloadBytes, _ := json.Marshal(payload)
-						kws.Emit(payloadBytes)
-
-						// Close connection without post-close actions
-						kws.SetAttribute("isClosed", true)
 					}
 				}
 			}
 		}
 	})()
+
+	<-goroutineDone
+	kws.SetAttribute("isClosed", true)
+	kws.Close()
 }
 
 func QueueWebsocketHandleDisconnect(ep *ikisocket.EventPayload) {
@@ -101,7 +110,7 @@ func QueueWebsocketHandleDisconnect(ep *ikisocket.EventPayload) {
 
 	// Send matchmaking server to remove this user from the queue
 	user := ep.Kws.GetAttribute("user").(models.User)
-	RedisSendLeaveQueue(int(user.ID))
+	RedisSendLeaveQueue(user.ID)
 
 	// Cancel Redis subscription goroutine
 	cancelGoroutine := ep.Kws.GetAttribute("cancelGoroutine").(chan bool)

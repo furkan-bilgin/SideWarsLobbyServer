@@ -13,25 +13,25 @@ import (
 )
 
 var (
-	RedisPairupListener *broadcast.Relay[NewPairup]
+	RedisNewMatchListener *broadcast.Relay[*NewMatch]
 )
 
 type MatchmakingUser struct {
-	UserID       int
+	UserID       uint
 	CreatedAt    time.Time
 	Elo          int
 	EloPlusMinus int
 }
 
-type NewPairup struct {
-	MatchID string
-	UserID  int
-	TeamID  uint8
+type NewMatch struct {
+	MatchmakingID string
+	UserIDs       []int
+	Teams         map[int]uint8
+	Match         *models.Match
 }
 
 func InitRedisController() {
-	RedisPairupListener = broadcast.NewRelay[NewPairup]()
-	listenQueueNewPair()
+	RedisNewMatchListener = broadcast.NewRelay[*NewMatch]()
 	listenQueueNewMatch()
 }
 
@@ -43,7 +43,7 @@ func RedisSendJoinQueue(mUser MatchmakingUser) {
 	}
 }
 
-func RedisSendLeaveQueue(userID int) {
+func RedisSendLeaveQueue(userID uint) {
 	data, _ := json.Marshal(MatchmakingUser{UserID: userID})
 	err := cache.RedisClient.Publish(context.Background(), "queue-remove-user", data).Err()
 	if err != nil {
@@ -51,25 +51,21 @@ func RedisSendLeaveQueue(userID int) {
 	}
 }
 
-func listenQueueNewPair() {
-	go redisListener("queue-new-pair", func(data []byte, dict map[string]interface{}) {
-		var pairUp NewPairup
-		json.Unmarshal(data, &pairUp)
-	})
-}
-
 func listenQueueNewMatch() {
 	go redisListener("queue-new-match", func(data []byte, dict map[string]interface{}) {
-		payload := struct {
-			MatchID string
-		}{}
-		json.Unmarshal(data, &payload)
+		// Load NewMatch from Redis pubsub
+		payload := &NewMatch{}
+		json.Unmarshal(data, payload)
 
-		err := database.DBQueries.CreateMatch(&models.Match{MatchmakingID: uuid.MustParse(payload.MatchID)})
-
+		// Create a new Match
+		match, err := database.DBQueries.FindOrCreateMatch(&models.Match{MatchmakingID: uuid.MustParse(payload.MatchmakingID)})
 		if err != nil {
 			panic(err)
 		}
+		payload.Match = match
+
+		// Broadcast it
+		RedisNewMatchListener.Notify(payload)
 	})
 }
 
