@@ -4,9 +4,14 @@ import (
 	"encoding/json"
 	"sidewarslobby/app/models"
 	"sidewarslobby/platform/database"
+	"sync"
 	"time"
 
 	"github.com/antoniodipinto/ikisocket"
+)
+
+var (
+	connectedSockets sync.Map
 )
 
 func QueueWebsocketNew(kws *ikisocket.Websocket) {
@@ -23,10 +28,9 @@ func QueueWebsocketNew(kws *ikisocket.Websocket) {
 
 	// Init cancel signal
 	cancelGoroutine := make(chan bool)
-	goroutineDone := make(chan bool)
 
 	// Init attributes
-	kws.SetAttribute("user", *user)
+	kws.SetAttribute("user", user)
 	kws.SetAttribute("isClosed", false)
 	kws.SetAttribute("cancelGoroutine", cancelGoroutine)
 	userId := user.ID
@@ -38,57 +42,7 @@ func QueueWebsocketNew(kws *ikisocket.Websocket) {
 	}
 
 	RedisSendJoinQueue(mUser)
-
-	go (func() {
-		for {
-			select {
-			case <-cancelGoroutine:
-				return
-			default:
-				// Listen matches
-				l := RedisNewMatchListener.Listener(1)
-
-				// Received a new match
-				for match := range l.Ch() {
-					for _, otherUserID := range match.UserIDs {
-						if otherUserID == int(userId) {
-							// Create UserMatch
-							userMatch := models.UserMatch{
-								UserID:       userId,
-								MatchID:      match.Match.ID,
-								UserChampion: user.UserInfo.SelectedChampion,
-								TeamID:       match.Teams[otherUserID],
-							}
-
-							err := database.DBQueries.CreateUserMatch(&userMatch)
-							if err != nil {
-								panic(err)
-							}
-
-							// Send payload to WebSocket client
-							payload := struct {
-								ServerIP   string
-								MatchToken string
-							}{ServerIP: "1.game.sw.furkanbilgin.net:9876", MatchToken: JWTCreateUserMatchToken(&userMatch)} // TODO: Change this
-
-							payloadBytes, _ := json.Marshal(payload)
-							kws.Emit(payloadBytes)
-							// Make the main-thread set attribute and close the connection, because it somehow causes a deadlock when we do it inside a goroutine.
-							goroutineDone <- true
-							return
-						}
-					}
-				}
-			}
-		}
-	})()
-
-	// Wait for goroutine to end
-	<-goroutineDone
-
-	// Close connection gracefully
-	kws.SetAttribute("isClosed", true)
-	kws.Close()
+	connectedSockets.Store(user.ID, kws)
 }
 
 func QueueWebsocketHandleDisconnect(ep *ikisocket.EventPayload) {
@@ -98,21 +52,68 @@ func QueueWebsocketHandleDisconnect(ep *ikisocket.EventPayload) {
 		return
 	}
 
+	user := ep.Kws.GetAttribute("user").(*models.User)
+
+	// It's already deleted, that means we don't need to do post-close actions
+	if _, contains := connectedSockets.Load(user.ID); !contains {
+		return
+	}
+
+	connectedSockets.Delete(user.ID)
+
 	// Return if we already did post-close actions
 	if ep.Kws.GetAttribute("isClosed") == true {
 		return
 	}
+	println("QUEUEWEBSOCKET - User disconnecting.")
 
 	// Set this to avoid double-closing
 	ep.Kws.SetAttribute("isClosed", true)
 
-	println("QUEUEWEBSOCKET - User disconnecting.")
-
 	// Send matchmaking server to remove this user from the queue
-	user := ep.Kws.GetAttribute("user").(models.User)
 	RedisSendLeaveQueue(user.ID)
 
 	// Cancel Redis subscription goroutine
 	cancelGoroutine := ep.Kws.GetAttribute("cancelGoroutine").(chan bool)
 	cancelGoroutine <- true
+}
+
+func QueueWebsocketNewMatch(match *NewMatch) {
+	for _, userId := range match.UserIDs {
+		kw, ok := connectedSockets.Load(uint(userId))
+
+		if !ok {
+			continue
+		}
+		kws := kw.(*ikisocket.Websocket)
+		user := kws.GetAttribute("user").(*models.User)
+
+		// Create UserMatch
+		userMatch := models.UserMatch{
+			UserID:       user.ID,
+			MatchID:      match.Match.ID,
+			UserChampion: user.UserInfo.SelectedChampion,
+			TeamID:       match.Teams[int(user.ID)],
+		}
+
+		// Insert it to database
+		err := database.DBQueries.CreateUserMatch(&userMatch)
+		if err != nil {
+			panic(err)
+		}
+
+		// Remove from connectedSockets so we don't do post-close actions
+		connectedSockets.Delete(user.ID)
+
+		// Send payload to WebSocket client
+		payload := struct {
+			ServerIP   string
+			MatchToken string
+		}{ServerIP: "1.game.sw.furkanbilgin.net:9876", MatchToken: JWTCreateUserMatchToken(&userMatch)} // TODO: Change this
+
+		payloadBytes, _ := json.Marshal(payload)
+
+		kws.Emit(payloadBytes)
+		kws.Close()
+	}
 }

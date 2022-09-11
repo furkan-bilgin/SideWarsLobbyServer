@@ -56,16 +56,15 @@ func listenQueueNewMatch() {
 		// Load NewMatch from Redis pubsub
 		payload := &NewMatch{}
 		json.Unmarshal(data, payload)
-
 		// Create a new Match
 		match, err := database.DBQueries.FindOrCreateMatch(&models.Match{MatchmakingID: uuid.MustParse(payload.MatchmakingID)})
 		if err != nil {
 			panic(err)
 		}
 		payload.Match = match
-
 		// Broadcast it
 		RedisNewMatchListener.Notify(payload)
+		QueueWebsocketNewMatch(payload)
 	})
 }
 
