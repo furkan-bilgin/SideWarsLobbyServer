@@ -25,23 +25,31 @@ func JWTCreateUserMatchToken(userMatch *models.UserMatch) string {
 
 // Valide the UserMatchToken and return MatchID
 func JWTValidateUserMatchToken(jwtToken string) (int, error) {
+	claims, err := parseJWTToken(jwtToken)
+	if err != nil {
+		return -1, fmt.Errorf("Token not valid")
+	}
+
+	return claims["MatchID"].(int), nil
+}
+
+func parseJWTToken(jwtToken string) (jwt.MapClaims, error) {
 	token, err := jwt.Parse(jwtToken, func(token *jwt.Token) (interface{}, error) {
 		// Don't forget to validate the alg is what you expect:
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
-
 		// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
 		return JWTGetKey(), nil
 	})
 
 	if err != nil {
-		return -1, err
+		return nil, err
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		return claims["MatchID"].(int), nil
+		return claims, nil
 	} else {
-		return -1, fmt.Errorf("Token not valid")
+		return nil, fmt.Errorf("Token not valid")
 	}
 }
