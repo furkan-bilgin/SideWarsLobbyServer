@@ -27,7 +27,7 @@ func JWTCreateUserMatchToken(userMatch *models.UserMatch) string {
 func JWTValidateUserMatchToken(jwtToken string) (int, error) {
 	claims, err := parseJWTToken(jwtToken)
 	if err != nil {
-		return -1, fmt.Errorf("Token not valid")
+		return -1, err
 	}
 
 	return claims["MatchID"].(int), nil
