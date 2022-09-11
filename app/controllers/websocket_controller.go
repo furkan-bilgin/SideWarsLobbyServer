@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/antoniodipinto/ikisocket"
-	"github.com/google/uuid"
 )
 
 func QueueWebsocketNew(kws *ikisocket.Websocket) {
@@ -55,7 +54,6 @@ func QueueWebsocketNew(kws *ikisocket.Websocket) {
 						if otherUserID == int(userId) {
 							// Create UserMatch
 							userMatch := models.UserMatch{
-								Token:        uuid.New().String(),
 								UserID:       userId,
 								MatchID:      match.Match.ID,
 								UserChampion: user.UserInfo.SelectedChampion,
@@ -63,7 +61,6 @@ func QueueWebsocketNew(kws *ikisocket.Websocket) {
 							}
 
 							err := database.DBQueries.CreateUserMatch(&userMatch)
-
 							if err != nil {
 								panic(err)
 							}
@@ -72,7 +69,7 @@ func QueueWebsocketNew(kws *ikisocket.Websocket) {
 							payload := struct {
 								ServerIP   string
 								MatchToken string
-							}{ServerIP: "1.game.sw.furkanbilgin.net:9876", MatchToken: userMatch.Token} // TODO: Change this
+							}{ServerIP: "1.game.sw.furkanbilgin.net:9876", MatchToken: JWTCreateUserMatchToken(&userMatch)} // TODO: Change this
 
 							payloadBytes, _ := json.Marshal(payload)
 							kws.Emit(payloadBytes)
@@ -86,7 +83,10 @@ func QueueWebsocketNew(kws *ikisocket.Websocket) {
 		}
 	})()
 
+	// Wait for goroutine to end
 	<-goroutineDone
+
+	// Close connection gracefully
 	kws.SetAttribute("isClosed", true)
 	kws.Close()
 }

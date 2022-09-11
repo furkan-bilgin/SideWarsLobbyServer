@@ -16,7 +16,6 @@ type UserMatch struct {
 	MatchID uint
 	UserID  uint
 	TeamID  uint8
-	Token   string
 
 	UserWon   bool
 	ScoreDiff int //Score diff after match is done

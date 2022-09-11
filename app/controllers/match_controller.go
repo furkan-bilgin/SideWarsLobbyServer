@@ -34,7 +34,14 @@ func ConfirmUserMatch(c *fiber.Ctx) error {
 		return err
 	}
 
-	userMatch, err := database.DBQueries.GetUserMatch(payload.UserMatchToken)
+	// Parse JWT token
+	matchID, err := JWTValidateUserMatchToken(payload.UserMatchToken)
+	if err != nil {
+		return utils.RESTError(c, "Maç bulunamadı")
+	}
+
+	// Get UserMatch from database
+	userMatch, err := database.DBQueries.GetUserMatch(matchID)
 	if err != nil {
 		return utils.RESTError(c, "Maç bulunamadı")
 	}
@@ -51,14 +58,14 @@ func FinishUserMatches(c *fiber.Ctx) error {
 	}
 
 	payload := struct {
-		UserMatchTokens   []string
-		WinnerMatchTokens []string
+		UserMatchIDs   []int
+		WinnerMatchIDs []int
 	}{}
 	if err := c.BodyParser(&payload); err != nil {
 		return err
 	}
 
-	for _, v := range payload.UserMatchTokens {
+	for _, v := range payload.UserMatchIDs {
 		userMatch, err := database.DBQueries.GetUserMatch(v)
 		if err != nil {
 			return utils.RESTError(c, "Maç bulunamadı")
@@ -94,7 +101,7 @@ func FinishUserMatches(c *fiber.Ctx) error {
 		}
 
 		// If we won, change these vars accordingly
-		if utils.Contains(payload.WinnerMatchTokens, v) {
+		if utils.Contains(payload.WinnerMatchIDs, v) {
 			gameResult = 1
 			userMatch.UserWon = true
 		}

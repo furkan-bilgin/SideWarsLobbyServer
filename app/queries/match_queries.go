@@ -45,10 +45,10 @@ func (q *MatchQueries) FindOrCreateMatch(match *models.Match) (*models.Match, er
 	return match, res.Error
 }
 
-func (q *MatchQueries) GetUserMatch(token string) (*models.UserMatch, error) {
+func (q *MatchQueries) GetUserMatch(id int) (*models.UserMatch, error) {
 	var userMatch models.UserMatch
 
-	res := q.DB.First(&userMatch, token)
+	res := q.DB.First(&userMatch, id)
 
 	if res.Error != nil {
 		return nil, res.Error
