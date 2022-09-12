@@ -23,3 +23,4 @@ go.work
 
 *.sh
 *.firebase.json 
+*.bat

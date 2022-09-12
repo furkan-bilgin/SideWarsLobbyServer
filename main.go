@@ -10,11 +10,16 @@ import (
 )
 
 func main() {
+	println("Creating rest")
 	rest := rest.Create()
+	println("Init database")
 	InitDatabases()
+	println("Init firebase")
 	InitFirebase()
+	println("Create websocket")
 	websocket.Create(rest)
-
+	
+	println("Done")
 	rest.Listen(":3000")
 }
 

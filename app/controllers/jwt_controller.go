@@ -30,7 +30,7 @@ func JWTValidateUserMatchToken(jwtToken string) (int, error) {
 		return -1, err
 	}
 
-	return claims["MatchID"].(int), nil
+	return int(claims["MatchID"].(float64)), nil
 }
 
 func parseJWTToken(jwtToken string) (jwt.MapClaims, error) {

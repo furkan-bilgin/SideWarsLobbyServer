@@ -37,7 +37,7 @@ func ConfirmUserMatch(c *fiber.Ctx) error {
 	// Parse JWT token
 	matchID, err := JWTValidateUserMatchToken(payload.UserMatchToken)
 	if err != nil {
-		return utils.RESTError(c, "Maç bulunamadı")
+		return utils.RESTError(c, "Token hatalı")
 	}
 
 	// Get UserMatch from database
@@ -47,6 +47,8 @@ func ConfirmUserMatch(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{
+		"UserID":       userMatch.User.ID,
+		"RoomID":       userMatch.Match.MatchmakingID,
 		"Username":     userMatch.User.Username,
 		"UserChampion": userMatch.UserChampion,
 	})
