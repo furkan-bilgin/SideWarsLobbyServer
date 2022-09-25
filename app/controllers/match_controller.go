@@ -51,6 +51,8 @@ func ConfirmUserMatch(c *fiber.Ctx) error {
 		"RoomID":       userMatch.Match.MatchmakingID,
 		"Username":     userMatch.User.Username,
 		"UserChampion": userMatch.UserChampion,
+		"UserMatchID":  userMatch.ID,
+		"TeamID":       userMatch.TeamID,
 	})
 }
 

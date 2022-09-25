@@ -37,7 +37,7 @@ func (q *MatchQueries) UpdateMatch(match *models.Match) error {
 }
 
 func (q *MatchQueries) FindOrCreateMatch(match *models.Match) (*models.Match, error) {
-	if m := q.GetMatchByMatchmakingID(match.MatchmakingID.String()); m != nil {
+	if m := q.GetMatchByMatchmakingID(match.MatchmakingID); m != nil {
 		return m, nil
 	}
 

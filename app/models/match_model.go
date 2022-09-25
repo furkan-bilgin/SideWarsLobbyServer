@@ -1,7 +1,6 @@
 package models
 
 import (
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -28,10 +27,9 @@ type UserMatch struct {
 
 type Match struct {
 	gorm.Model
-	MatchmakingID uuid.UUID `gorm:"index;unique"`
-
-	Finished    bool
-	UserMatches []UserMatch
+	MatchmakingID string `gorm:"index;unique"`
+	Finished      bool
+	UserMatches   []UserMatch
 }
 
 func (m *Match) GetUsersByTeamID(teamID uint8) []*User {
