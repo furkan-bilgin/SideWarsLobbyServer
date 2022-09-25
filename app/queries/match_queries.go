@@ -48,7 +48,7 @@ func (q *MatchQueries) FindOrCreateMatch(match *models.Match) (*models.Match, er
 func (q *MatchQueries) GetUserMatch(id int) (*models.UserMatch, error) {
 	var userMatch models.UserMatch
 
-	res := q.DB.First(&userMatch, id)
+	res := q.DB.Model(models.UserMatch{}).Preload("Match").Preload("Match.UserMatches").First(&userMatch, id)
 
 	if res.Error != nil {
 		return nil, res.Error

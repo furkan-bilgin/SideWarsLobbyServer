@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"bytes"
+	"encoding/json"
 	"os"
 	"sidewarslobby/app/models"
 	"sidewarslobby/pkg/repository"
@@ -62,17 +63,23 @@ func FinishUserMatches(c *fiber.Ctx) error {
 	}
 
 	payload := struct {
-		UserMatchIDs   []int
-		WinnerMatchIDs []int
+		UserMatchIDs   string
+		WinnerMatchIDs string
 	}{}
 	if err := c.BodyParser(&payload); err != nil {
 		return err
 	}
 
-	for _, v := range payload.UserMatchIDs {
+	// Decode json lists
+	var userMatchIDs []int
+	var winnerMatchIDs []int
+	json.Unmarshal([]byte(payload.UserMatchIDs), &userMatchIDs)
+	json.Unmarshal([]byte(payload.WinnerMatchIDs), &winnerMatchIDs)
+
+	for _, v := range userMatchIDs {
 		userMatch, err := database.DBQueries.GetUserMatch(v)
 		if err != nil {
-			return utils.RESTError(c, "Maç bulunamadı")
+			return utils.RESTError(c, "Maç bulunamadı, "+err.Error())
 		}
 
 		// Find enemy team
@@ -105,7 +112,7 @@ func FinishUserMatches(c *fiber.Ctx) error {
 		}
 
 		// If we won, change these vars accordingly
-		if utils.Contains(payload.WinnerMatchIDs, v) {
+		if utils.Contains(winnerMatchIDs, v) {
 			gameResult = 1
 			userMatch.UserWon = true
 		}
