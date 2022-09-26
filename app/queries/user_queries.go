@@ -2,6 +2,7 @@ package queries
 
 import (
 	"sidewarslobby/app/models"
+	"sidewarslobby/pkg/repository"
 
 	"firebase.google.com/go/auth"
 	"github.com/google/uuid"
@@ -63,6 +64,20 @@ func (q *UserQueries) CreateOrUpdateUser(firebaseUser *auth.UserRecord) (*models
 }
 
 func (q *UserQueries) CacheUserElo(user *models.User) error {
-	user.CachedElo = user.CalculateElo()
+	// Fetch UserMatches
+	var userMatches []models.UserMatch
+	res := q.DB.Model(user).Preload("Match").Association("UserMatches").Find(&userMatches)
+	if res != nil {
+		return res
+	}
+
+	// Add match diffs into beginner elo
+	diff := repository.BeginnerElo
+	for _, v := range userMatches {
+		if v.Match.Finished {
+			diff += v.ScoreDiff
+		}
+	}
+	user.CachedElo = diff
 	return q.DB.Save(user).Error
 }

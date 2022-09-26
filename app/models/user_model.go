@@ -1,8 +1,6 @@
 package models
 
 import (
-	"sidewarslobby/pkg/repository"
-
 	"gorm.io/gorm"
 )
 
@@ -25,15 +23,4 @@ type UserInfo struct {
 	UserID uint
 
 	SelectedChampion uint8
-}
-
-func (u *User) CalculateElo() int {
-	diff := repository.BeginnerElo
-	for _, v := range u.UserMatches {
-		if v.Match.Finished {
-			diff += v.ScoreDiff
-		}
-	}
-
-	return diff
 }
