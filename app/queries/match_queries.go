@@ -48,7 +48,7 @@ func (q *MatchQueries) FindOrCreateMatch(match *models.Match) (*models.Match, er
 func (q *MatchQueries) GetUserMatch(id int) (*models.UserMatch, error) {
 	var userMatch models.UserMatch
 
-	res := q.DB.Model(models.UserMatch{}).Preload("Match").Preload("Match.UserMatches").First(&userMatch, id)
+	res := q.DB.Model(models.UserMatch{}).Preload("Match").Preload("User").Preload("Match.UserMatches").First(&userMatch, id)
 
 	if res.Error != nil {
 		return nil, res.Error
@@ -63,4 +63,20 @@ func (q *MatchQueries) UpdateUserMatch(userMatch *models.UserMatch) error {
 
 func (q *MatchQueries) CreateUserMatch(userMatch *models.UserMatch) error {
 	return q.DB.Create(userMatch).Error
+}
+
+func (q *MatchQueries) GetMatchUsersByTeamID(match *models.Match, teamID uint8) ([]models.User, error) {
+	var userMatches []models.UserMatch
+	res := q.DB.Model(match).Preload("User").Association("UserMatches").Find(&userMatches)
+	if res != nil {
+		return nil, res
+	}
+
+	var ret []models.User
+	for _, v := range userMatches {
+		if v.TeamID == teamID {
+			ret = append(ret, v.User)
+		}
+	}
+	return ret, nil
 }

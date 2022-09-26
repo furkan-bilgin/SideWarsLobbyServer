@@ -31,14 +31,3 @@ type Match struct {
 	Finished      bool
 	UserMatches   []UserMatch
 }
-
-func (m *Match) GetUsersByTeamID(teamID uint8) []*User {
-	var res []*User
-	for _, v := range m.UserMatches {
-		if v.TeamID == teamID {
-			res = append(res, &v.User)
-		}
-	}
-
-	return res
-}

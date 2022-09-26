@@ -12,9 +12,13 @@ type UserQueries struct {
 	DB *gorm.DB
 }
 
+func preloadUser(db *gorm.DB) *gorm.DB {
+	return db.Model(models.User{}).Preload("UserMatches").Preload("UserInfo")
+}
+
 func (q *UserQueries) GetUserById(id uint) *models.User {
 	var user models.User
-	res := q.DB.First(&user, id)
+	res := preloadUser(q.DB).First(&user, id)
 
 	if res.Error != nil {
 		return nil
@@ -25,7 +29,7 @@ func (q *UserQueries) GetUserById(id uint) *models.User {
 
 func (q *UserQueries) GetUserByToken(token string) *models.User {
 	var user models.User
-	res := q.DB.First(&user, "token = ?", token)
+	res := preloadUser(q.DB).First(&user, "token = ?", token)
 	if res.Error != nil {
 		return nil
 	}

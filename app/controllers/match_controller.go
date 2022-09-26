@@ -3,6 +3,7 @@ package controllers
 import (
 	"bytes"
 	"encoding/json"
+	"math"
 	"os"
 	"sidewarslobby/app/models"
 	"sidewarslobby/pkg/repository"
@@ -89,7 +90,11 @@ func FinishUserMatches(c *fiber.Ctx) error {
 		}
 
 		// Calculate average enemy elo
-		enemies := userMatch.Match.GetUsersByTeamID(enemyTeam)
+		enemies, err := database.DBQueries.GetMatchUsersByTeamID(&userMatch.Match, enemyTeam)
+		if err != nil {
+			return utils.RESTError(c, "Hata, "+err.Error())
+		}
+
 		enemySum := 0
 		for _, v := range enemies {
 			enemySum += v.CachedElo
@@ -97,8 +102,9 @@ func FinishUserMatches(c *fiber.Ctx) error {
 		averageEnemyElo := enemySum / len(enemies)
 
 		// Lerp: K_Beginner -> K_Default over the course of LerpKGameCount games
-		kValue := (repository.LerpKGameCount - len(userMatch.User.UserMatches)) / repository.LerpKGameCount
-		kValue = int(utils.LinearInterp(repository.DefaultEloK, repository.BeginnerEloK, float64(kValue)))
+		t := float64(repository.LerpKGameCount-len(userMatch.User.UserMatches)) / float64(repository.LerpKGameCount)
+		t = math.Min(0, t)
+		kValue := int(utils.LinearInterp(repository.DefaultEloK, repository.BeginnerEloK, t))
 
 		elo := utils.NewEloWithFactors(kValue, utils.NewElo().D)
 
