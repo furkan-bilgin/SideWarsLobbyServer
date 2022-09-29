@@ -28,14 +28,14 @@ func (q *UserQueries) GetUserById(id uint) *models.User {
 	return &user
 }
 
-func (q *UserQueries) GetUserByToken(token string) *models.User {
+func (q *UserQueries) GetUserByToken(token string) (*models.User, error) {
 	var user models.User
 	res := preloadUser(q.DB).First(&user, "token = ?", token)
 	if res.Error != nil {
-		return nil
+		return nil, res.Error
 	}
 
-	return &user
+	return &user, nil
 }
 
 func (q *UserQueries) UpdateUserDetails(user models.User, updates models.User) {

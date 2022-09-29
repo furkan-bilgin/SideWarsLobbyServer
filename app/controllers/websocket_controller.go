@@ -16,10 +16,10 @@ var (
 
 func QueueWebsocketNew(kws *ikisocket.Websocket) {
 	userToken := kws.Params("token")
-	user := database.DBQueries.GetUserByToken(userToken)
+	user, err := database.DBQueries.GetUserByToken(userToken)
 
 	// Disconnect if the user failed to authenticate
-	if user == nil {
+	if user == nil || err != nil {
 		println("QUEUEWEBSOCKET - User failed to authenticate. (token " + userToken + ")")
 
 		kws.Close()
