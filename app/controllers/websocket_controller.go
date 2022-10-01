@@ -79,6 +79,7 @@ func QueueWebsocketHandleDisconnect(ep *ikisocket.EventPayload) {
 }
 
 func QueueWebsocketNewMatch(match *NewMatch) {
+	// TODO: send blueteam redteam
 	for _, userId := range match.UserIDs {
 		kw, ok := connectedSockets.Load(uint(userId))
 

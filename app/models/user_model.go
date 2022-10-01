@@ -10,7 +10,7 @@ type User struct {
 	Username        string
 	FirebaseID      string
 	ProfilePhotoURL string
-	Token           string
+	Token           string `gorm:"index;unique"`
 
 	CachedElo int
 
