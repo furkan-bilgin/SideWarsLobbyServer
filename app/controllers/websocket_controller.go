@@ -26,13 +26,9 @@ func QueueWebsocketNew(kws *ikisocket.Websocket) {
 		return
 	}
 
-	// Init cancel signal
-	cancelGoroutine := make(chan bool)
-
 	// Init attributes
 	kws.SetAttribute("user", user)
 	kws.SetAttribute("isClosed", false)
-	kws.SetAttribute("cancelGoroutine", cancelGoroutine)
 	userId := user.ID
 
 	mUser := MatchmakingUser{
@@ -72,10 +68,6 @@ func QueueWebsocketHandleDisconnect(ep *ikisocket.EventPayload) {
 
 	// Send matchmaking server to remove this user from the queue
 	RedisSendLeaveQueue(user.ID)
-
-	// Cancel Redis subscription goroutine
-	cancelGoroutine := ep.Kws.GetAttribute("cancelGoroutine").(chan bool)
-	cancelGoroutine <- true
 }
 
 func QueueWebsocketNewMatch(match *NewMatch) {
