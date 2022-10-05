@@ -10,9 +10,13 @@ type MatchQueries struct {
 	DB *gorm.DB
 }
 
+func preloadMatch(db *gorm.DB) *gorm.DB {
+	return db.Model(models.Match{}).Preload("UserMatches").Preload("UserMatches.User")
+}
+
 func (q *MatchQueries) GetMatch(id int) *models.Match {
 	var match models.Match
-	res := q.DB.First(&match, id)
+	res := preloadMatch(q.DB).First(&match, id)
 
 	if res.Error != nil {
 		return nil
@@ -23,7 +27,7 @@ func (q *MatchQueries) GetMatch(id int) *models.Match {
 
 func (q *MatchQueries) GetMatchByMatchmakingID(mId string) *models.Match {
 	var match models.Match
-	res := q.DB.First(&match, "matchmaking_id = ?", mId)
+	res := preloadMatch(q.DB).First(&match, "matchmaking_id = ?", mId)
 
 	if res.Error != nil {
 		return nil

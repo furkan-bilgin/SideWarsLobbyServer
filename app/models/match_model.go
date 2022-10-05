@@ -4,11 +4,6 @@ import (
 	"gorm.io/gorm"
 )
 
-const (
-	TeamRed  uint8 = 0
-	TeamBlue uint8 = 1
-)
-
 type UserMatch struct {
 	gorm.Model
 

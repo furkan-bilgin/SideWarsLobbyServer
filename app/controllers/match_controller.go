@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"math"
 	"os"
-	"sidewarslobby/app/models"
 	"sidewarslobby/pkg/repository"
 	"sidewarslobby/pkg/utils"
 	"sidewarslobby/platform/database"
@@ -84,9 +83,9 @@ func FinishUserMatches(c *fiber.Ctx) error {
 		}
 
 		// Find enemy team
-		enemyTeam := models.TeamRed
-		if userMatch.TeamID == models.TeamRed {
-			enemyTeam = models.TeamBlue
+		enemyTeam := repository.TeamRed
+		if userMatch.TeamID == repository.TeamRed {
+			enemyTeam = repository.TeamBlue
 		}
 
 		// Calculate average enemy elo
