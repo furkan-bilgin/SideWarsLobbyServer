@@ -59,7 +59,8 @@ func AuthViaFirebase(c *fiber.Ctx) error {
 	dbUser, newUser := database.DBQueries.CreateOrUpdateUser(firebaseUser)
 
 	return c.JSON(fiber.Map{
-		"Token":   dbUser.Token,
-		"NewUser": newUser,
+		"Token":    dbUser.Token,
+		"NewUser":  newUser,
+		"UserInfo": dbUser.UserInfo.Sanitize(),
 	})
 }

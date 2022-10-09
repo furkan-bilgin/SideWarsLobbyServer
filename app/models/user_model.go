@@ -24,3 +24,9 @@ type UserInfo struct {
 
 	SelectedChampion uint8
 }
+
+func (u *UserInfo) Sanitize() UserInfo {
+	return UserInfo{
+		SelectedChampion: u.SelectedChampion,
+	}
+}
