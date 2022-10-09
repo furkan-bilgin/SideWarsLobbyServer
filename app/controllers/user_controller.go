@@ -56,3 +56,26 @@ func GetLastFinishedUserMatch(c *fiber.Ctx) error {
 		"RedTeam":    teams["RedTeam"],
 	})
 }
+
+func SetUserChampion(c *fiber.Ctx) error {
+	user := validateUserToken(c)
+	if user == nil {
+		return nil
+	}
+
+	payload := struct {
+		SelectedChampion int
+	}{}
+	if err := c.BodyParser(&payload); err != nil {
+		return err
+	}
+
+	// TODO: Validate champion ID
+	database.DBQueries.UpdateUserInfo(user.UserInfo, models.UserInfo{
+		SelectedChampion: uint8(payload.SelectedChampion),
+	})
+
+	return c.JSON(fiber.Map{
+		"Success": true,
+	})
+}

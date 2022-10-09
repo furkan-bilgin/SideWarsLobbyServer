@@ -42,6 +42,10 @@ func (q *UserQueries) UpdateUserDetails(user models.User, updates models.User) {
 	q.DB.Model(&user).Updates(updates)
 }
 
+func (q *UserQueries) UpdateUserInfo(userInfo models.UserInfo, updates models.UserInfo) {
+	q.DB.Model(&userInfo).Updates(updates)
+}
+
 // Creates or updates a user, also returns True if a new user record was created
 func (q *UserQueries) CreateOrUpdateUser(firebaseUser *auth.UserRecord) (*models.User, bool) {
 	var user models.User
