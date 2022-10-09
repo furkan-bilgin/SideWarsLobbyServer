@@ -38,12 +38,12 @@ func (q *UserQueries) GetUserByToken(token string) (*models.User, error) {
 	return &user, nil
 }
 
-func (q *UserQueries) UpdateUserDetails(user models.User, updates models.User) {
-	q.DB.Model(&user).Updates(updates)
+func (q *UserQueries) UpdateUserDetails(user models.User, updates models.User) error {
+	return q.DB.Model(&user).Updates(updates).Error
 }
 
-func (q *UserQueries) UpdateUserInfo(userInfo models.UserInfo, updates models.UserInfo) {
-	q.DB.Model(&userInfo).Updates(updates)
+func (q *UserQueries) UpdateUserInfo(userInfo models.UserInfo, updates models.UserInfo) error {
+	return q.DB.Model(&userInfo).Updates(updates).Error
 }
 
 // Creates or updates a user, also returns True if a new user record was created

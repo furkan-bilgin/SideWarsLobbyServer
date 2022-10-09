@@ -71,9 +71,13 @@ func SetUserChampion(c *fiber.Ctx) error {
 	}
 
 	// TODO: Validate champion ID
-	database.DBQueries.UpdateUserInfo(user.UserInfo, models.UserInfo{
+	err := database.DBQueries.UpdateUserInfo(user.UserInfo, models.UserInfo{
 		SelectedChampion: uint8(payload.SelectedChampion),
 	})
+
+	if err != nil {
+		return utils.RESTError(c, "Failed to update")
+	}
 
 	return c.JSON(fiber.Map{
 		"Success": true,
