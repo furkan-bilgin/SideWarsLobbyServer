@@ -59,6 +59,9 @@ func (q *UserQueries) CreateOrUpdateUser(firebaseUser *auth.UserRecord) (*models
 		user.FirebaseID = firebaseUser.UID
 
 		q.DB.Create(&user)
+		q.DB.Create(models.UserInfo{
+			UserID: user.ID,
+		})
 		return &user, true
 	}
 
