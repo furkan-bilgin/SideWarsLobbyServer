@@ -79,8 +79,10 @@ func SetUserChampion(c *fiber.Ctx) error {
 		return utils.RESTError(c, "Failed to update")
 	}
 
+	newUserInfo := database.DBQueries.GetUserById(user.ID).UserInfo
+
 	return c.JSON(fiber.Map{
 		"Success":  true,
-		"UserInfo": user.UserInfo.Sanitize(),
+		"UserInfo": newUserInfo.Sanitize(),
 	})
 }
