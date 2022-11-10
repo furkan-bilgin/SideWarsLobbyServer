@@ -22,7 +22,7 @@ func validateUserToken(c *fiber.Ctx) *models.User {
 	return user
 }
 
-func GetLastFinishedUserMatch(c *fiber.Ctx) error {
+func GetLatestUserMatch(c *fiber.Ctx) error {
 	user := validateUserToken(c)
 	if user == nil {
 		return nil

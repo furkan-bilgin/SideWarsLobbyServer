@@ -31,7 +31,7 @@ func serveV1Api(app *fiber.App) {
 	// User
 	v1.Post("/user/auth-firebase", controllers.AuthViaFirebase)
 	v1.Post("/user/set-champion", controllers.SetUserChampion)
-	v1.Get("/user/last-finished-match", controllers.GetLastFinishedUserMatch)
+	v1.Get("/user/lastest-match", controllers.GetLatestUserMatch)
 
 	// GameServer
 	v1.Post("/server/confirm-user-match", controllers.ConfirmUserMatch)
