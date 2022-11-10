@@ -93,7 +93,7 @@ func QueueWebsocketNewMatch(match *NewMatch) {
 			UserID:       user.ID,
 			MatchID:      match.Match.ID,
 			UserChampion: user.UserInfo.SelectedChampion,
-			TeamID:       match.Teams[int(user.ID)],
+			TeamID:       match.Teams[int(user.ID)] + 1, // Matchmaker sends teams as 0 and 1, and we use 1 and 2, so increment it by one
 		}
 
 		// Insert it to database
