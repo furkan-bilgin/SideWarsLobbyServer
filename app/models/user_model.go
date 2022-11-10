@@ -26,5 +26,6 @@ type UserInfo struct {
 func (u *UserInfo) Sanitize() UserInfo {
 	return UserInfo{
 		SelectedChampion: u.SelectedChampion,
+		CachedElo:        u.CachedElo,
 	}
 }
