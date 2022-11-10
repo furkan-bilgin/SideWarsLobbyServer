@@ -71,8 +71,15 @@ func QueueWebsocketHandleDisconnect(ep *ikisocket.EventPayload) {
 }
 
 func QueueWebsocketNewMatch(match *NewMatch) {
+	type WebsocketSendQueueItem struct {
+		Payload   []byte
+		Websocket *ikisocket.Websocket
+	}
+
+	sendQueue := make([]WebsocketSendQueueItem, len(match.UserIDs))
+
 	// TODO: send blueteam redteam
-	for _, userId := range match.UserIDs {
+	for idx, userId := range match.UserIDs {
 		kw, ok := connectedSockets.Load(uint(userId))
 
 		if !ok {
@@ -97,16 +104,23 @@ func QueueWebsocketNewMatch(match *NewMatch) {
 
 		// Remove from connectedSockets so we don't do post-close actions
 		connectedSockets.Delete(user.ID)
-
-		// Send payload to WebSocket client
 		payload := struct {
 			ServerIP   string
 			MatchToken string
 		}{ServerIP: "1.game.sw.furkanbilgin.net:9876", MatchToken: JWTCreateUserMatchToken(&userMatch)} // TODO: Change this
 
+		// Add to send queue
 		payloadBytes, _ := json.Marshal(payload)
+		sendQueue[idx].Payload = payloadBytes
+		sendQueue[idx].Websocket = kws
+	}
 
-		kws.Emit(payloadBytes)
-		kws.Close()
+	for _, item := range sendQueue {
+		if item.Websocket == nil {
+			continue
+		}
+
+		item.Websocket.Emit(item.Payload)
+		item.Websocket.Close()
 	}
 }
