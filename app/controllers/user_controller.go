@@ -6,6 +6,7 @@ import (
 	"sidewarslobby/pkg/repository"
 	"sidewarslobby/pkg/utils"
 	"sidewarslobby/platform/database"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -64,15 +65,20 @@ func SetUserChampion(c *fiber.Ctx) error {
 	}
 
 	payload := struct {
-		SelectedChampion int
+		SelectedChampion string
 	}{}
 	if err := c.BodyParser(&payload); err != nil {
 		return err
 	}
 
+	selectedChampion, err := strconv.Atoi(payload.SelectedChampion)
+	if err != nil {
+		return utils.RESTError(c, "Champion not an integer, got: "+payload.SelectedChampion)
+	}
+
 	// TODO: Validate champion ID
-	err := database.DBQueries.UpdateUserInfo(user.UserInfo, models.UserInfo{
-		SelectedChampion: uint8(payload.SelectedChampion),
+	err = database.DBQueries.UpdateUserInfo(user.UserInfo, models.UserInfo{
+		SelectedChampion: uint8(selectedChampion),
 	})
 
 	if err != nil {
