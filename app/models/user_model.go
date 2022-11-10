@@ -7,12 +7,9 @@ import (
 type User struct {
 	gorm.Model
 
-	Username        string
-	FirebaseID      string
-	ProfilePhotoURL string
-	Token           string `gorm:"index;unique"`
-
-	CachedElo int
+	Username   string
+	FirebaseID string
+	Token      string `gorm:"index;unique"`
 
 	UserMatches []UserMatch `gorm:"foreignKey:UserID"`
 	UserInfo    UserInfo    `gorm:"foreignKey:UserID"`
@@ -23,6 +20,7 @@ type UserInfo struct {
 	UserID uint
 
 	SelectedChampion uint8
+	CachedElo        int
 }
 
 func (u *UserInfo) Sanitize() UserInfo {

@@ -34,7 +34,7 @@ func QueueWebsocketNew(kws *ikisocket.Websocket) {
 	mUser := MatchmakingUser{
 		UserID:    userId,
 		CreatedAt: time.Now(),
-		Elo:       user.CachedElo,
+		Elo:       user.UserInfo.CachedElo,
 	}
 
 	RedisSendJoinQueue(mUser)

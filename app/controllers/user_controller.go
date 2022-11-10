@@ -45,12 +45,12 @@ func GetLastFinishedUserMatch(c *fiber.Ctx) error {
 		data := struct {
 			Elo      int
 			Username string
-		}{Elo: v.User.CachedElo, Username: v.User.Username}
+		}{Elo: v.User.UserInfo.CachedElo, Username: v.User.Username}
 		teams[team] = append(teams[team], data)
 	}
 
 	return c.JSON(fiber.Map{
-		"CurrentElo": user.CachedElo,
+		"CurrentElo": user.UserInfo.CachedElo,
 		"ScoreDiff":  lastUserMatch.ScoreDiff,
 		"ShowRank":   len(user.UserMatches) >= repository.LerpKGameCount,
 		"BlueTeam":   teams["BlueTeam"],

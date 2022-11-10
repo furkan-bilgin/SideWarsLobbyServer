@@ -96,7 +96,7 @@ func FinishUserMatches(c *fiber.Ctx) error {
 
 		enemySum := 0
 		for _, v := range enemies {
-			enemySum += v.CachedElo
+			enemySum += v.UserInfo.CachedElo
 		}
 		averageEnemyElo := enemySum / len(enemies)
 
@@ -123,7 +123,7 @@ func FinishUserMatches(c *fiber.Ctx) error {
 		}
 
 		// gameResult = 1 -> user wins, gameResult = 0 -> enemy wins
-		userMatch.ScoreDiff = elo.RatingDelta(userMatch.User.CachedElo, averageEnemyElo, float64(gameResult))
+		userMatch.ScoreDiff = elo.RatingDelta(userMatch.User.UserInfo.CachedElo, averageEnemyElo, float64(gameResult))
 
 		// Finally, update UserMatch info, and re-cache user elo
 		database.DBQueries.UpdateUserMatch(userMatch)

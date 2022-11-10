@@ -49,7 +49,7 @@ func (q *UserQueries) UpdateUserInfo(userInfo models.UserInfo, updates models.Us
 // Creates or updates a user, also returns True if a new user record was created
 func (q *UserQueries) CreateOrUpdateUser(firebaseUser *auth.UserRecord) (*models.User, bool) {
 	var user models.User
-	userUpdate := models.User{ProfilePhotoURL: firebaseUser.PhotoURL, Username: firebaseUser.DisplayName, Token: uuid.NewString()}
+	userUpdate := models.User{Username: firebaseUser.DisplayName, Token: uuid.NewString()}
 
 	res := q.DB.First(&user, "firebase_id = ?", firebaseUser.UID)
 
@@ -85,6 +85,6 @@ func (q *UserQueries) CacheUserElo(user *models.User) error {
 			diff += v.ScoreDiff
 		}
 	}
-	user.CachedElo = diff
-	return q.DB.Save(user).Error
+	user.UserInfo.CachedElo = diff
+	return q.DB.Save(user.UserInfo).Error
 }
