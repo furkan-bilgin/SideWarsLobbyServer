@@ -86,5 +86,5 @@ func (q *UserQueries) CacheUserElo(user *models.User) error {
 		}
 	}
 	user.UserInfo.CachedElo = diff
-	return q.DB.Save(user.UserInfo).Error
+	return q.DB.Save(&user.UserInfo).Error
 }

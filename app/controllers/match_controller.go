@@ -8,6 +8,7 @@ import (
 	"sidewarslobby/pkg/repository"
 	"sidewarslobby/pkg/utils"
 	"sidewarslobby/platform/database"
+	"strconv"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -79,7 +80,8 @@ func FinishUserMatches(c *fiber.Ctx) error {
 	for _, v := range userMatchIDs {
 		userMatch, err := database.DBQueries.GetUserMatch(v)
 		if err != nil {
-			return utils.RESTError(c, "Maç bulunamadı, "+err.Error())
+			print("UserMatch #"+strconv.Itoa(v)+" not found. Skipping it.");
+//			return utils.RESTError(c, "Error: "+err.Error()+" for matchID: "+strconv.Itoa(v))
 		}
 
 		// Find enemy team
