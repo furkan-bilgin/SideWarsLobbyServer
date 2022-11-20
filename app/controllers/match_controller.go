@@ -80,7 +80,8 @@ func FinishUserMatches(c *fiber.Ctx) error {
 	for _, v := range userMatchIDs {
 		userMatch, err := database.DBQueries.GetUserMatch(v)
 		if err != nil {
-			print("UserMatch #"+strconv.Itoa(v)+" not found. Skipping it.");
+			print("UserMatch #"+strconv.Itoa(v)+" not found. Skipping it.")
+			continue
 //			return utils.RESTError(c, "Error: "+err.Error()+" for matchID: "+strconv.Itoa(v))
 		}
 
